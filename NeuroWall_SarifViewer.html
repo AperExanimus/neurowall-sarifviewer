@@ -3,164 +3,352 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NeuroWall SARIF Viewer - Offline SARIF Security Report Viewer</title>
+  <title>NeuroWall SARIF Viewer v4 - SARIF Triage Viewer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #121315; min-height: 100vh; padding: 20px; color: #b3b3b3;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #121315;
+      min-height: 100vh;
+      padding: 20px;
+      color: #b3b3b3;
     }
 
     .container {
-      max-width: 1200px; margin: 0 auto; background: #1a1b1f; border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.5); overflow: hidden; border: 1px solid #2a2b31;
+      max-width: 1240px;
+      margin: 0 auto;
+      background: #1a1b1f;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+      border: 1px solid #2a2b31;
     }
 
     .header {
       background: linear-gradient(135deg, #1e1f23 0%, #252731 100%);
-      color: #e6e6e6; padding: 30px; text-align: center; position: relative;
+      color: #e6e6e6;
+      padding: 28px;
+      text-align: center;
+      position: relative;
     }
 
-    .header h1 { font-size: 2rem; margin-bottom: 10px; font-weight: 400; }
-    .header p { opacity: .9; font-size: 1rem; margin-bottom: 10px; }
+    .header h1 { font-size: 2rem; margin-bottom: 8px; font-weight: 500; }
+    .header p { opacity: 0.92; font-size: 1rem; }
 
     .powered-by {
-      position: absolute; top: 16px; right: 24px; color: #7a7a8a; font-size: .9rem;
-      display: flex; align-items: center; gap: 8px;
+      position: absolute;
+      top: 16px;
+      right: 22px;
+      color: #7a7a8a;
+      font-size: 0.85rem;
+      display: flex;
+      gap: 6px;
+      align-items: center;
     }
+
     .powered-by a { color: #399ff6; text-decoration: none; font-weight: 600; }
     .powered-by a:hover { text-decoration: underline; }
 
-    .upload-section { padding: 32px; text-align: center; border-bottom: 1px solid #2a2b31; background: #1a1b1f; }
+    .upload-section {
+      padding: 30px;
+      text-align: center;
+      border-bottom: 1px solid #2a2b31;
+      background: #1a1b1f;
+    }
+
     .file-input-wrapper { position: relative; display: inline-block; margin-bottom: 12px; }
     .file-input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 
     .file-input-button {
-      display: inline-block; padding: 14px 26px; background: linear-gradient(135deg, #1e1f23 0%, #252731 100%);
-      color: #e6e6e6; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer;
-      transition: all .2s ease; border: 1px solid #3a3b41;
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #1e1f23 0%, #252731 100%);
+      color: #e6e6e6;
+      border-radius: 8px;
+      font-size: 1rem;
+      border: 1px solid #3a3b41;
+      cursor: pointer;
+      transition: 0.2s;
     }
-    .file-input-button:hover { background: linear-gradient(135deg, #252731 0%, #2e3241 100%); border-color: #4a4b51; }
 
-    .file-name { margin-top: 12px; color: #7a7a8a; font-style: italic; }
+    .file-input-button:hover {
+      background: linear-gradient(135deg, #252731 0%, #2f3442 100%);
+      border-color: #4a4b51;
+    }
 
-    .report-section { padding: 30px; display: none; background: #1a1b1f; }
+    .file-name { margin-top: 10px; color: #8a8aa0; font-style: italic; }
+
+    .report-section { padding: 26px; display: none; }
+
     .summary-card {
-      background: linear-gradient(135deg, #1e1f23 0%, #252731 100%); color: #e6e6e6;
-      padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #3a3b41;
+      background: linear-gradient(135deg, #1e1f23 0%, #252731 100%);
+      border: 1px solid #3a3b41;
+      color: #e6e6e6;
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 18px;
     }
 
     .summary-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px; margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
     }
+
     .stat-box {
-      background: rgba(30,31,35,.6); padding: 12px; border-radius: 8px; text-align: center;
-      border: 1px solid rgba(58,59,65,.5);
+      background: rgba(30,31,35,0.6);
+      border: 1px solid rgba(58,59,65,0.5);
+      border-radius: 8px;
+      text-align: center;
+      padding: 10px;
     }
-    .stat-number { font-size: 1.6rem; font-weight: bold; display: block; }
-    .stat-label { font-size: .8rem; opacity: .95; margin-top: 5px; }
 
-    .controls { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .stat-number { display: block; font-size: 1.5rem; font-weight: 700; color: #f3f3f3; }
+    .stat-label { font-size: 0.78rem; color: #bdbdc8; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
     .group-toggle, .sort-toggle {
-      display: flex; background: #2a2b31; border-radius: 8px; overflow: hidden; border: 1px solid #3a3b41;
+      display: flex;
+      border: 1px solid #3a3b41;
+      background: #2a2b31;
+      border-radius: 8px;
+      overflow: hidden;
     }
 
-    .group-toggle button, .sort-toggle button {
-      padding: 8px 12px; border: none; background: transparent; cursor: pointer;
-      font-size: .85rem; color: #b3b3b3;
+    .group-toggle button, .sort-toggle button, .aux-btn {
+      border: none;
+      background: transparent;
+      color: #b3b3b3;
+      font-size: 0.83rem;
+      cursor: pointer;
+      padding: 8px 12px;
     }
+
     .group-toggle button.active, .sort-toggle button.active {
-      background: #1e1f23; color: #e6e6e6; border: 1px solid #4a4b51;
+      background: #1e1f23;
+      color: #e6e6e6;
+      border: 1px solid #4a4b51;
     }
 
-    .filter-section { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-left: auto; }
-    .filter-input {
-      background: #2a2b31; border: 1px solid #3a3b41; border-radius: 6px;
-      padding: 8px 10px; color: #e6e6e6; font-size: .85rem; min-width: 260px;
+    .filter-section {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-    .filter-input:focus { outline: none; border-color: #399ff6; box-shadow: 0 0 0 2px rgba(57,159,246,.2); }
-    .clear-filter {
-      background: #3a3b41; border: none; color: #b3b3b3; padding: 8px 12px;
-      border-radius: 6px; cursor: pointer; font-size: .85rem;
+
+    .filter-input, .status-filter, .status-select {
+      background: #2a2b31;
+      border: 1px solid #3a3b41;
+      color: #e6e6e6;
+      border-radius: 6px;
+      padding: 7px 9px;
+      font-size: 0.82rem;
     }
+
+    .filter-input { min-width: 250px; }
+
+    .filter-input:focus, .status-filter:focus, .status-select:focus {
+      outline: none;
+      border-color: #399ff6;
+      box-shadow: 0 0 0 2px rgba(57,159,246,0.2);
+    }
+
+    .aux-btn {
+      background: #3a3b41;
+      border-radius: 6px;
+      color: #d3d3dc;
+      border: 1px solid #4a4b51;
+    }
+
+    .aux-btn:hover { background: #4a4b51; }
 
     .rule-group {
-      background: #1e1f23; border-radius: 12px; margin-bottom: 14px; overflow: hidden;
       border: 1px solid #3a3b41;
+      background: #1e1f23;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
     }
-    .rule-header { padding: 13px 16px; background: #2a2b31; border-bottom: 1px solid #3a3b41; cursor: pointer; }
+
+    .rule-header {
+      padding: 12px 14px;
+      background: #2a2b31;
+      border-bottom: 1px solid #3a3b41;
+      cursor: pointer;
+    }
+
     .rule-title {
-      font-size: 1rem; color: #e6e6e6; margin-bottom: 6px; font-weight: 600;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #ededf2;
+      font-weight: 600;
+      margin-bottom: 5px;
     }
-    .rule-meta { display: flex; flex-wrap: wrap; gap: 8px; color: #b3b3b3; font-size: .8rem; align-items: center; }
+
+    .rule-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #b3b3b3;
+      align-items: center;
+    }
 
     .severity-badge {
-      padding: 4px 10px; border-radius: 14px; font-size: .75rem; font-weight: 700; text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border: 1px solid transparent;
     }
 
-    .severity-error    { background: rgba(239,68,68,.2); color: #fca5a5; border: 1px solid rgba(239,68,68,.3); }
-    .severity-warning  { background: rgba(245,158,11,.2); color: #fcd34d; border: 1px solid rgba(245,158,11,.3); }
-    .severity-info     { background: rgba(59,130,246,.2); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
+    .severity-critical { background: rgba(220,38,38,.28); color: #fecaca; border-color: rgba(220,38,38,.45); }
+    .severity-high     { background: rgba(239,68,68,.22); color: #fca5a5; border-color: rgba(239,68,68,.35); }
+    .severity-medium   { background: rgba(245,158,11,.22); color: #fcd34d; border-color: rgba(245,158,11,.35); }
+    .severity-low      { background: rgba(59,130,246,.20); color: #93c5fd; border-color: rgba(59,130,246,.30); }
+    .severity-info     { background: rgba(16,185,129,.18); color: #99f6e4; border-color: rgba(16,185,129,.35); }
+    .severity-unknown  { background: rgba(107,114,128,.22); color: #d1d5db; border-color: rgba(107,114,128,.35); }
 
-    .severity-critical { background: rgba(220,38,38,.28); color: #fecaca; border: 1px solid rgba(220,38,38,.45); }
-    .severity-high     { background: rgba(239,68,68,.22); color: #fca5a5; border: 1px solid rgba(239,68,68,.35); }
-    .severity-medium   { background: rgba(245,158,11,.22); color: #fcd34d; border: 1px solid rgba(245,158,11,.35); }
-    .severity-low      { background: rgba(59,130,246,.2); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
-    .severity-unknown  { background: rgba(107,114,128,.22); color: #d1d5db; border: 1px solid rgba(107,114,128,.35); }
+    .status-pill {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      border: 1px solid #4a4b51;
+      background: #1e1f23;
+      color: #ddd;
+    }
+
+    .status-pending { color: #fcd34d; border-color: rgba(245,158,11,.35); }
+    .status-true_positive { color: #fca5a5; border-color: rgba(239,68,68,.35); }
+    .status-false_positive { color: #86efac; border-color: rgba(34,197,94,.35); }
 
     .findings-count {
-      background: #1e1f23; color: #e6e6e6; padding: 3px 8px; border-radius: 12px;
-      font-size: .75rem; font-weight: 600; border: 1px solid #4a4b51;
+      background: #1e1f23;
+      color: #e6e6e6;
+      border: 1px solid #4a4b51;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 7px;
     }
 
-    .rule-content { display: none; padding: 0 16px 16px 16px; }
+    .rule-content { display: none; padding: 0 14px 14px 14px; }
     .rule-content.expanded { display: block; }
 
     .rule-description {
-      color: #b3b3b3; line-height: 1.5; margin: 10px 0 12px 0; padding: 10px;
-      background: #1a1b1f; border-radius: 8px; border-left: 4px solid #1e1f23; font-size: .85rem;
+      margin: 10px 0 12px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #1a1b1f;
+      border-left: 4px solid #2f3442;
+      color: #bcc0cc;
+      font-size: 0.82rem;
+      line-height: 1.45;
     }
 
-    .finding-item { margin-bottom: 10px; border: 1px solid #3a3b41; border-radius: 8px; overflow: hidden; background: #1a1b1f; }
+    .finding-item {
+      border: 1px solid #3a3b41;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      background: #1a1b1f;
+    }
+
     .finding-summary {
-      padding: 10px 12px; background: #2a2b31; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 11px;
+      background: #2a2b31;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
     }
-    .file-info { display: flex; align-items: center; gap: 8px; color: #e6e6e6; font-size: .8rem; flex-wrap: wrap; }
-    .line-info { color: #9ca3af; font-size: .75rem; }
 
-    .finding-details { display: none; border-top: 1px solid #3a3b41; background: #1e1f23; }
+    .file-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: #e6e6e6;
+      font-size: 0.8rem;
+    }
+
+    .line-info { color: #9ca3af; font-size: 0.75rem; }
+
+    .finding-details {
+      display: none;
+      border-top: 1px solid #3a3b41;
+      background: #1e1f23;
+    }
+
     .finding-details.expanded { display: block; }
     .finding-content { padding: 12px; }
-    .description { color: #b3b3b3; line-height: 1.5; margin-bottom: 10px; font-size: .85rem; }
+    .description { color: #c0c4d0; font-size: 0.84rem; line-height: 1.5; margin-bottom: 10px; }
 
     .code-header {
-      background: #2d3748; color: white; padding: 8px 10px; border-radius: 6px 6px 0 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .75rem;
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #2d3748;
+      color: #fff;
+      font-size: 0.74rem;
+      padding: 7px 9px;
+      border-radius: 6px 6px 0 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
+
     .code-container { background: #1a202c; border-radius: 0 0 6px 6px; overflow: hidden; }
     .code-block {
-      background: #1a202c; color: #e2e8f0; padding: 10px; overflow-x: auto;
+      margin: 0;
+      padding: 9px;
+      color: #e2e8f0;
+      background: #1a202c;
+      overflow-x: auto;
+      font-size: 0.74rem;
+      line-height: 1.25;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: .75rem; line-height: 1.25; margin: 0;
     }
+
     .code-line { display: block; }
-    .line-number { color: #718096; margin-right: 8px; min-width: 30px; display: inline-block; text-align: right; }
-    .vulnerable-line { background: rgba(239,68,68,.2); border-left: 4px solid #ef4444; padding-left: 8px; margin-left: -8px; }
-    .vulnerable-code { background: rgba(239,68,68,.35); color: #fed7d7; padding: 1px 3px; border-radius: 3px; }
+    .line-number {
+      color: #718096;
+      min-width: 28px;
+      display: inline-block;
+      text-align: right;
+      margin-right: 8px;
+    }
 
-    .no-findings { text-align: center; padding: 50px 20px; color: #666; }
-    .no-findings-icon { font-size: 3rem; margin-bottom: 10px; opacity: .6; }
+    .vulnerable-line {
+      background: rgba(239,68,68,0.2);
+      border-left: 4px solid #ef4444;
+      padding-left: 8px;
+      margin-left: -8px;
+    }
 
-    @media (max-width: 768px) {
-      .container { margin: 8px; border-radius: 10px; }
-      .header { padding: 20px; }
+    .vulnerable-code {
+      background: rgba(239,68,68,.35);
+      color: #fed7d7;
+      padding: 1px 3px;
+      border-radius: 3px;
+    }
+
+    .no-findings { text-align: center; padding: 48px 20px; color: #7e8598; }
+    .no-findings-icon { font-size: 2.7rem; margin-bottom: 10px; opacity: 0.7; }
+
+    @media (max-width: 860px) {
       .powered-by { position: static; margin-top: 10px; justify-content: center; }
-      .upload-section, .report-section { padding: 18px; }
       .controls { align-items: flex-start; }
       .filter-section { margin-left: 0; width: 100%; }
       .filter-input { min-width: 100%; }
@@ -173,8 +361,8 @@
       <div class="powered-by">
         Powered by <a href="https://inceite.com" target="_blank" rel="noopener">Inceite</a>
       </div>
-      <h1>NeuroWall SARIF Viewer</h1>
-      <p>Offline SARIF Security Report Viewer</p>
+      <h1>NeuroWall SARIF Viewer v4</h1>
+      <p>Offline SARIF Security Report Viewer + Triage Status</p>
     </div>
 
     <div class="upload-section">
@@ -186,7 +374,7 @@
     </div>
 
     <div id="reportSection" class="report-section">
-      <div id="summaryCard" class="summary-card">
+      <div class="summary-card">
         <h2>📊 Security Analysis Summary</h2>
         <div id="summaryGrid" class="summary-grid"></div>
       </div>
@@ -194,19 +382,27 @@
       <div class="controls">
         <label><strong>Group by:</strong></label>
         <div class="group-toggle">
-          <button id="groupByRule" class="active" onclick="setGroupMode('rule')">🔧 Detection Rule</button>
-          <button id="groupByFile" onclick="setGroupMode('file')">📄 Filename</button>
+          <button id="groupByRule" class="active" onclick="setGroupMode('rule')">🔧 Rule</button>
+          <button id="groupByFile" onclick="setGroupMode('file')">📄 File</button>
         </div>
 
         <label><strong>Sort by:</strong></label>
         <div class="sort-toggle">
           <button id="sortByName" onclick="setSortMode('name')">🔤 Name</button>
-          <button id="sortBySeverity" class="active" onclick="setSortMode('severity')">⚠️ Severity + Confidence</button>
+          <button id="sortBySeverity" class="active" onclick="setSortMode('severity')">⚠️ Severity+Confidence</button>
         </div>
 
         <div class="filter-section">
-          <input type="text" id="filterInput" class="filter-input" placeholder="Filter by filename or vulnerability name..." />
-          <button id="clearFilter" class="clear-filter" onclick="clearFilter()">✕ Clear</button>
+          <select id="statusFilter" class="status-filter" onchange="handleStatusFilter(event)">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="true_positive">True Positive</option>
+            <option value="false_positive">False Positive</option>
+          </select>
+
+          <input type="text" id="filterInput" class="filter-input" placeholder="Filter filename, rule, or text..." />
+          <button class="aux-btn" onclick="clearFilter()">✕ Clear</button>
+          <button class="aux-btn" onclick="downloadUpdatedSarif()">⬇ Save SARIF</button>
         </div>
       </div>
 
@@ -223,11 +419,16 @@
     const summaryGrid = document.getElementById('summaryGrid');
     const findingsContainer = document.getElementById('findingsContainer');
     const filterInput = document.getElementById('filterInput');
+    const statusFilter = document.getElementById('statusFilter');
 
     let currentFindings = [];
+    let currentSarifData = null;
+    let findingIdMap = {};
+
     let groupMode = 'rule';
     let sortMode = 'severity';
     let filterText = '';
+    let filterStatus = '';
 
     const severityRank = { critical: 0, high: 1, medium: 2, low: 3, info: 4, unknown: 5 };
     const confidenceRank = { high: 0, medium: 1, low: 2, unknown: 3 };
@@ -236,13 +437,12 @@
     filterInput.addEventListener('input', handleFilter);
 
     function handleFileSelect(event) {
-      const file = event.target.files[0];
+      const file = event.target.files?.[0];
       if (!file) return;
-
       fileName.textContent = `Selected: ${file.name}`;
 
       const reader = new FileReader();
-      reader.onload = function (e) {
+      reader.onload = function(e) {
         try {
           const sarifData = JSON.parse(e.target.result);
           generateReport(sarifData);
@@ -254,13 +454,20 @@
     }
 
     function handleFilter(event) {
-      filterText = event.target.value.toLowerCase();
+      filterText = (event.target.value || '').toLowerCase();
+      if (currentFindings.length > 0) displayFindings(currentFindings);
+    }
+
+    function handleStatusFilter(event) {
+      filterStatus = event.target.value || '';
       if (currentFindings.length > 0) displayFindings(currentFindings);
     }
 
     function clearFilter() {
-      filterInput.value = '';
       filterText = '';
+      filterStatus = '';
+      filterInput.value = '';
+      statusFilter.value = '';
       if (currentFindings.length > 0) displayFindings(currentFindings);
     }
 
@@ -331,6 +538,33 @@
       return 'unknown';
     }
 
+    function normalizeStatus(result) {
+      const s = result.properties?.triage_status;
+      if (s === 'pending' || s === 'true_positive' || s === 'false_positive') return s;
+      return 'pending';
+    }
+
+    function getFindingKey(finding) {
+      const loc = finding.locations?.[0]?.physicalLocation;
+      const uri = loc?.artifactLocation?.uri || finding.uri || 'unknown';
+      const line = loc?.region?.startLine || finding.line || 0;
+      return `${finding.ruleId}|${uri}|${line}`;
+    }
+
+    function setStatus(finding, value) {
+      if (!finding?._resultRef) return;
+      finding._resultRef.properties = finding._resultRef.properties || {};
+      finding._resultRef.properties.triage_status = value;
+      finding.status = value;
+    }
+
+    function updateFindingStatus(id, value) {
+      const finding = findingIdMap[id];
+      if (!finding) return;
+      setStatus(finding, value);
+      displayFindings(currentFindings);
+    }
+
     function pickBestFinding(findings) {
       return findings.reduce((best, f) => {
         const s = severityRank[f.severity] ?? severityRank.unknown;
@@ -342,10 +576,11 @@
     }
 
     function generateReport(sarifData) {
+      currentSarifData = sarifData;
       const runs = sarifData.runs || [];
-      let allFindings = [];
-      let uniqueRules = new Set();
-      let severityCounts = { critical: 0, high: 0, medium: 0, low: 0, info: 0, unknown: 0 };
+      const allFindings = [];
+      const uniqueRules = new Set();
+      const severityCounts = { critical: 0, high: 0, medium: 0, low: 0, info: 0, unknown: 0 };
 
       runs.forEach(run => {
         const results = run.results || [];
@@ -357,6 +592,7 @@
           const rule = ruleMap[result.ruleId] || {};
           const severity = normalizeSeverity(result, rule);
           const confidence = normalizeConfidence(result);
+          const status = normalizeStatus(result);
 
           const finding = {
             ruleId: result.ruleId || 'unknown',
@@ -365,39 +601,22 @@
             ruleDescription: rule.fullDescription?.text || rule.shortDescription?.text || 'No rule description available',
             severity,
             confidence,
+            status,
             locations: result.locations || [],
             uri: result.locations?.[0]?.physicalLocation?.artifactLocation?.uri || 'Unknown file',
-            line: result.locations?.[0]?.physicalLocation?.region?.startLine || null
+            line: result.locations?.[0]?.physicalLocation?.region?.startLine || null,
+            _resultRef: result
           };
 
           allFindings.push(finding);
           uniqueRules.add(finding.ruleId);
           severityCounts[finding.severity] = (severityCounts[finding.severity] || 0) + 1;
+
+          // ensure SARIF has status property
+          result.properties = result.properties || {};
+          if (!result.properties.triage_status) result.properties.triage_status = status;
         });
       });
-
-      // Debug tables
-      console.group('SARIF normalization debug');
-      console.log('Runs:', runs.length, 'Findings:', allFindings.length);
-      console.table(allFindings.map(f => ({
-        ruleId: f.ruleId,
-        uri: f.uri,
-        severity: f.severity,
-        confidence: f.confidence,
-        message: (f.description || '').slice(0, 80)
-      })));
-
-      const raw = [];
-      runs.forEach(run => (run.results || []).forEach(r => raw.push(r)));
-      console.table(raw.slice(0, 20).map(r => ({
-        ruleId: r.ruleId,
-        level: r.level,
-        issue_severity: r.properties?.issue_severity,
-        issue_confidence: r.properties?.issue_confidence,
-        security_severity: r.properties?.['security-severity']
-      })));
-      console.log('severityCounts:', severityCounts);
-      console.groupEnd();
 
       currentFindings = allFindings;
       generateSummary(allFindings.length, uniqueRules.size, severityCounts);
@@ -407,8 +626,8 @@
 
     function generateSummary(totalFindings, uniqueRules, severityCounts) {
       summaryGrid.innerHTML = `
-        <div class="stat-box"><span class="stat-number">${totalFindings}</span><span class="stat-label">Total Findings</span></div>
-        <div class="stat-box"><span class="stat-number">${uniqueRules}</span><span class="stat-label">Unique Rules</span></div>
+        <div class="stat-box"><span class="stat-number">${totalFindings}</span><span class="stat-label">Total</span></div>
+        <div class="stat-box"><span class="stat-number">${uniqueRules}</span><span class="stat-label">Rules</span></div>
         <div class="stat-box"><span class="stat-number">${severityCounts.critical || 0}</span><span class="stat-label">Critical</span></div>
         <div class="stat-box"><span class="stat-number">${severityCounts.high || 0}</span><span class="stat-label">High</span></div>
         <div class="stat-box"><span class="stat-number">${severityCounts.medium || 0}</span><span class="stat-label">Medium</span></div>
@@ -418,13 +637,17 @@
     }
 
     function filterFindings(findings) {
-      if (!filterText) return findings;
-      return findings.filter(finding =>
-        finding.uri.toLowerCase().includes(filterText) ||
-        finding.ruleName.toLowerCase().includes(filterText) ||
-        finding.ruleId.toLowerCase().includes(filterText) ||
-        finding.description.toLowerCase().includes(filterText)
-      );
+      return findings.filter(finding => {
+        const textMatch =
+          !filterText ||
+          finding.uri.toLowerCase().includes(filterText) ||
+          finding.ruleName.toLowerCase().includes(filterText) ||
+          finding.ruleId.toLowerCase().includes(filterText) ||
+          finding.description.toLowerCase().includes(filterText);
+
+        const statusMatch = !filterStatus || finding.status === filterStatus;
+        return textMatch && statusMatch;
+      });
     }
 
     function displayFindings(findings) {
@@ -433,9 +656,9 @@
       if (filteredFindings.length === 0) {
         findingsContainer.innerHTML = `
           <div class="no-findings">
-            <div class="no-findings-icon">${filterText ? '🔍' : '✅'}</div>
-            <h3>${filterText ? 'No Matching Results' : 'No Security Findings'}</h3>
-            <p>${filterText ? 'Try adjusting your search terms.' : 'Great! No security issues were found in the analyzed code.'}</p>
+            <div class="no-findings-icon">${(filterText || filterStatus) ? '🔍' : '✅'}</div>
+            <h3>${(filterText || filterStatus) ? 'No Matching Results' : 'No Security Findings'}</h3>
+            <p>${(filterText || filterStatus) ? 'Try adjusting your filters.' : 'Great! No security issues were found.'}</p>
           </div>
         `;
         return;
@@ -447,6 +670,7 @@
 
     function displayFindingsByRule(findings) {
       const groupedByRule = {};
+      findingIdMap = {};
 
       findings.forEach(finding => {
         if (!groupedByRule[finding.ruleId]) {
@@ -495,9 +719,11 @@
             </div>
             <div id="rule-content-${groupIndex}" class="rule-content">
               <div class="rule-description">${escapeHtml(group.ruleDescription)}</div>
-              ${group.findings.map((finding, findingIndex) =>
-                generateFindingItem(finding, `${groupIndex}-${findingIndex}`)
-              ).join('')}
+              ${group.findings.map((finding, findingIndex) => {
+                const fid = `${groupIndex}-${findingIndex}`;
+                findingIdMap[fid] = finding;
+                return generateFindingItem(finding, fid);
+              }).join('')}
             </div>
           </div>
         `;
@@ -506,6 +732,7 @@
 
     function displayFindingsByFile(findings) {
       const groupedByFile = {};
+      findingIdMap = {};
 
       findings.forEach(finding => {
         if (!groupedByFile[finding.uri]) groupedByFile[finding.uri] = [];
@@ -542,18 +769,27 @@
               </div>
             </div>
             <div id="rule-content-${groupIndex}" class="rule-content">
-              ${fileFindings.map((finding, findingIndex) =>
-                generateFindingItem(finding, `${groupIndex}-${findingIndex}`)
-              ).join('')}
+              ${fileFindings.map((finding, findingIndex) => {
+                const fid = `${groupIndex}-${findingIndex}`;
+                findingIdMap[fid] = finding;
+                return generateFindingItem(finding, fid);
+              }).join('')}
             </div>
           </div>
         `;
       }).join('');
     }
 
+    function statusLabel(status) {
+      if (status === 'true_positive') return 'True Positive';
+      if (status === 'false_positive') return 'False Positive';
+      return 'Pending';
+    }
+
     function generateFindingItem(finding, id) {
       const location = finding.locations[0]?.physicalLocation;
       const region = location?.region;
+      const currentStatus = finding.status || 'pending';
 
       return `
         <div class="finding-item">
@@ -561,8 +797,18 @@
             <div class="file-info">
               <span class="severity-badge severity-${finding.severity}">${finding.severity}</span>
               <span class="line-info">Confidence: ${finding.confidence.toUpperCase()}</span>
+              <span class="status-pill status-${currentStatus}">Status: ${statusLabel(currentStatus)}</span>
               <span>${groupMode === 'rule' ? '📄 ' + escapeHtml(finding.uri) : '🔧 ' + escapeHtml(finding.ruleId)}</span>
               ${region ? `<span class="line-info">Line ${region.startLine}${region.endLine && region.endLine !== region.startLine ? `-${region.endLine}` : ''}</span>` : ''}
+
+              <label class="line-info" style="margin-left:6px;">Set:</label>
+              <select class="status-select"
+                onclick="event.stopPropagation()"
+                onchange="updateFindingStatus('${id}', this.value); event.stopPropagation();">
+                <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="true_positive" ${currentStatus === 'true_positive' ? 'selected' : ''}>True Positive</option>
+                <option value="false_positive" ${currentStatus === 'false_positive' ? 'selected' : ''}>False Positive</option>
+              </select>
             </div>
             <span>▶</span>
           </div>
@@ -578,7 +824,6 @@
 
     function generateCodeSection(location) {
       if (!location) return '';
-
       const region = location.region;
       const contextRegion = location.contextRegion;
       if (!contextRegion && !region) return '';
@@ -601,7 +846,7 @@
           const before = processedLine.substring(0, vulnerableColumn - 1);
           const vuln = processedLine.substring(vulnerableColumn - 1, vulnerableEndColumn);
           const after = processedLine.substring(vulnerableEndColumn);
-          processedLine = before + `<span class="vulnerable-code">${vuln}</span>` + after;
+          processedLine = `${before}<span class="vulnerable-code">${vuln}</span>${after}`;
         }
 
         return `<span class="code-line ${isVulnerable ? 'vulnerable-line' : ''}"><span class="line-number">${lineNumber}</span>${processedLine}</span>`;
@@ -636,6 +881,22 @@
       const div = document.createElement('div');
       div.textContent = text == null ? '' : String(text);
       return div.innerHTML;
+    }
+
+    function downloadUpdatedSarif() {
+      if (!currentSarifData) {
+        alert('Load a SARIF file first.');
+        return;
+      }
+      const blob = new Blob([JSON.stringify(currentSarifData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sarif_with_triage_status.sarif.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
   </script>
 </body>
